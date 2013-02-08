@@ -5,7 +5,7 @@
   (let [env (System/getenv "TUMBLR_API_KEY")]
     (if env
       env
-      (slurp secret.txt))))
+      (slurp "secret.txt"))))
 
 
 (defn create-url [positionals]
