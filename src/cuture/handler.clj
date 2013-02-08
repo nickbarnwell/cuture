@@ -1,6 +1,7 @@
 (ns cuture.handler
   (:use compojure.core)
   (:use [cuture.tumblr :only (fetch-corgis)])
+  (:use ring.adapter.jetty)
   (:require [compojure.handler :as handler]
             [compojure.route :as route]))
 
@@ -13,3 +14,7 @@
 
 (def app
   (handler/site app-routes))
+
+(defn -main [& args]
+ (let [port (Integer/parseInt (get (System/getenv) "PORT" "8080"))]
+    (run-jetty app {:port port})))

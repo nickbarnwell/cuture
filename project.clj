@@ -4,6 +4,7 @@
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [compojure "1.1.5"]
                  [clj-http "0.6.4"]
+                 [ring/ring-jetty-adapter "0.3.8"]
                  ]
   ;:main cuture.tumblr
   :plugins [[lein-ring "0.8.2"]]
