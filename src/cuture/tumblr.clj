@@ -1,9 +1,13 @@
 (ns cuture.tumblr
   (:require [clj-http.client :as client]))
 
-(defn get-corgis 
-  ([] (first (get-corgis 1)))
-  ([n] (repeat n nil)))
+(def api-key
+  (let [env (System/getenv "TUMBLR_API_KEY")]
+    (if env
+      env
+      (slurp secret.txt)
+      )
+    ))
 
 
 (defn create-url [positionals]
