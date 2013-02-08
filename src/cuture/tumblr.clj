@@ -31,20 +31,20 @@
 
 (defn get-posts-tagged [tags]
   "Retrieve posts tagged with [tags] from tumblr API"
-  (extract-posts (tumblr-request client/get [:tagged] 
+  (extract-posts (tumblr-request client/get [:tagged]
     {:query-params {"tag" (clojure.string/join (map name tags))}})))
 
 (defn largest-photos-in-post [post]
   (let [photos (:photos post)]
     (for [itm photos
           :let [sizes (:alt_sizes itm)]]
-      (apply max-key :width sizes)))) 
+      (apply max-key :width sizes))))
 
-(defn fetch-corgis 
+(defn fetch-corgis
   ([] (first (fetch-corgis 1)))
   ([n]
   "Fetches n-more corgis from tumblr"
-  (let [corgis! (into [] 
-                  (flatten (map 
+  (let [corgis! (into []
+                  (flatten (map
                      largest-photos-in-post (get-posts-tagged ["corgi"]))))]
   (map :url (take n (repeatedly #(rand-nth corgis!)))))))
