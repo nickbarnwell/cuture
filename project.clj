@@ -5,6 +5,7 @@
                  [compojure "1.1.5"]
                  [clj-http "0.6.4"]
                  ]
+  ;:main cuture.tumblr
   :plugins [[lein-ring "0.8.2"]]
   :ring {:handler cuture.handler/app}
   :profiles
