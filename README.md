@@ -7,6 +7,8 @@ a la PugMe.
 
 You will need [Leiningen][1] 1.7.0 or above installed.
 
+Place your Tumblr API key in the env var "TUMBLR_API_KEY"
+
 [1]: https://github.com/technomancy/leiningen
 
 ## Running
