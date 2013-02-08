@@ -1,6 +1,7 @@
 # cuture
 
-FIXME
+Corgis go Webscale. Cuture (pronounced "cuter") serves up Corgi-filled JSON
+a la PugMe. 
 
 ## Prerequisites
 
@@ -16,4 +17,6 @@ To start a web server for the application, run:
 
 ## License
 
-Copyright © 2013 FIXME
+Copyright © 2013 Nicholas Barnwell
+Feel free to use for educational purposes; if you want to run an instance for
+your own use that's cool too. Just be kind to tumblr, ok?
