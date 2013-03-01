@@ -7,6 +7,9 @@
       env
       (slurp "secret.txt"))))
 
+;; The way this is meant to work is to have a 'store' of corgis that operates as
+;; a perpetually filled queue, backfilling when it shrinks below a certain
+;; threshold.
 
 (defn create-url [positionals]
   (let [base-url "http://api.tumblr.com/v2"
@@ -39,9 +42,9 @@
       (apply max-key :width sizes))))
 
 (defn fetch-corgis
+  "Fetches 1 or n corgis from tumblr"
   ([] (first (fetch-corgis 1)))
   ([n]
-  "Fetches n-more corgis from tumblr"
   (let [corgis! (into []
                   (flatten (map
                      largest-photos-in-post (get-posts-tagged ["corgi"]))))]
