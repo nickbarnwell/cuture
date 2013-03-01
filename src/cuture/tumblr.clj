@@ -1,5 +1,6 @@
 (ns cuture.tumblr
-  (:require [clj-http.client :as client]))
+  (:require [clj-http.client :as client]
+            [cheshire.core :as json]))
 
 (def api-key
   (let [env (System/getenv "TUMBLR_API_KEY")]
@@ -16,24 +17,45 @@
         components (cons base-url positionals)]
     (clojure.string/join "/" (map name components))))
 
-(defn tumblr-request
-  ([fnk positionals] (tumblr-request fnk positionals nil))
-  ([fnk positionals data] (tumblr-request fnk positionals data nil))
-  ([fnk positionals data opts]
-    (let [url (create-url positionals)
-          request-opts (merge {:as :json} opts)
-          all-options (merge data request-opts)
-          payload (assoc-in all-options [:query-params "api_key"] api-key)]
-       (fnk url payload))))
+(defn create-tumblr-request
+  ([method positionals] (create-tumblr-request method positionals nil))
+  ([method positionals data] (create-tumblr-request method positionals data nil))
+  ([method positionals data opts]
+   (let [req {
+              :as :json
+              :url (create-url positionals)
+              :method method
+              :query-params { "api_key" api-key } 
+              }
+         req (merge-with merge req opts)
+         req (if (#{:post :put :delete} method)
+               (assoc req :body (json/generate-string data))
+               (assoc req :query-params (merge-with merge (req :query-params) data)))]
+     req)))
 
 (defn extract-posts [resp]
   "Extract Posts collection from Tumblr API response."
   (get-in resp [:body :response]))
 
-(defn get-posts-tagged [tags]
-  "Retrieve posts tagged with [tags] from tumblr API"
-  (extract-posts (tumblr-request client/get [:tagged]
-    {:query-params {"tag" (clojure.string/join (map name tags))}})))
+(defn get-posts-tagged [tag & tags]
+  "Returns a lazy seq of posts tagged with [tags] from tumblr API.
+  Chunks are 20 items each."
+  (let [tags {"tag" (clojure.string/join (map name (cons tag tags)))}
+        req (create-tumblr-request :get [:tagged] tags)
+        update-req (fn [req before]
+                     (assoc-in req [:query-params :before] before))
+        exec-req-one (fn exec-req-one [req]
+                       (-> req client/request extract-posts))
+        exec-request (fn exec-request [req]
+                       (clojure.pprint/pprint req)
+                       (let [resp (exec-req-one req)
+                             before (-> resp last :timestamp) ]
+                         (let [new-req (update-req req before)]
+                           (clojure.pprint/pprint new-req)
+                           (comment (lazy-cat resp (exec-request new-req)))
+                           resp
+                           )))]
+    (exec-request req)))
 
 (defn largest-photos-in-post [post]
   (let [photos (:photos post)]
@@ -46,6 +68,6 @@
   ([] (first (fetch-corgis 1)))
   ([n]
   (let [corgis! (into []
-                  (flatten (map
-                     largest-photos-in-post (get-posts-tagged ["corgi"]))))]
-  (map :url (take n (repeatedly #(rand-nth corgis!)))))))
+                  (flatten 
+                    (map largest-photos-in-post (get-posts-tagged ["corgi"]))))]
+  (set (take n (repeatedly #(-> corgis! rand-nth :url)))))))
