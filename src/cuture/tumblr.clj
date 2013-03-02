@@ -47,13 +47,10 @@
         exec-req-one (fn exec-req-one [req]
                        (-> req client/request extract-posts))
         exec-request (fn exec-request [req]
-                       (clojure.pprint/pprint req)
                        (let [resp (exec-req-one req)
                              before (-> resp last :timestamp) ]
                          (let [new-req (update-req req before)]
-                           (clojure.pprint/pprint new-req)
-                           (comment (lazy-cat resp (exec-request new-req)))
-                           resp
+                           (lazy-cat resp (exec-request new-req))
                            )))]
     (exec-request req)))
 
