@@ -13,11 +13,12 @@
 ;; threshold.
 
 (defn create-url [positionals]
+  "Takes positionals and returns appropariate endpoint URL"
   (let [base-url "http://api.tumblr.com/v2"
         components (cons base-url positionals)]
     (clojure.string/join "/" (map name components))))
 
-(defn create-tumblr-request
+(defn tumblr-request
   ([method positionals] (create-tumblr-request method positionals nil))
   ([method positionals data] (create-tumblr-request method positionals data nil))
   ([method positionals data opts]
@@ -37,10 +38,10 @@
   "Extract Posts collection from Tumblr API response."
   (get-in resp [:body :response]))
 
-(defn get-posts-tagged [tag & tags]
+(defn posts-tagged
   "Returns a lazy seq of posts tagged with [tags] from tumblr API.
   Chunks are 20 items each."
-  (let [tags {"tag" (clojure.string/join (map name (cons tag tags)))}
+  ([tags] (let [tags {"tag" (clojure.string/join (map name tags))}
         req (create-tumblr-request :get [:tagged] tags)
         update-req (fn [req before]
                      (assoc-in req [:query-params :before] before))
@@ -48,11 +49,12 @@
                        (-> req client/request extract-posts))
         exec-request (fn exec-request [req]
                        (let [resp (exec-req-one req)
-                             before (-> resp last :timestamp) ]
+                             before (-> resp peek :timestamp)]
                          (let [new-req (update-req req before)]
                            (lazy-cat resp (exec-request new-req))
                            )))]
-    (exec-request req)))
+    (exec-request req))))
+
 
 (defn largest-photos-in-post [post]
   (let [photos (:photos post)]
