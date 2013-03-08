@@ -55,6 +55,10 @@
                            )))]
     (exec-request req))))
 
+(defn has-photos? [post]
+  (if (:photos post)
+    true
+    false))
 
 (defn largest-photos-in-post [post]
   (let [photos (:photos post)]
@@ -62,11 +66,8 @@
           :let [sizes (:alt_sizes itm)]]
       (apply max-key :width sizes))))
 
-(defn fetch-corgis
-  "Fetches 1 or n corgis from tumblr"
-  ([] (first (fetch-corgis 1)))
-  ([n]
-  (let [corgis! (into []
-                  (flatten 
-                    (map largest-photos-in-post (get-posts-tagged ["corgi"]))))]
-  (set (take n (repeatedly #(-> corgis! rand-nth :url)))))))
+(defn photos-tagged [tags]
+  "Lazy sequence of photos tagged with [tags]"
+  (let [photos (map largest-photos-in-post
+                    (filter has-photos? (posts-tagged tags)))]
+  (->> (flatten photos) (map :url))))
