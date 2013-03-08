@@ -1,15 +1,15 @@
 (ns cuture.handler
   (:use compojure.core)
-  (:use [cuture.tumblr :only (fetch-corgis)])
+  (:use [cuture.tumblr.posts :only (photos-tagged)])
   (:use ring.adapter.jetty)
   (:require [compojure.handler :as handler]
             [compojure.route :as route]))
 
 (defroutes app-routes
   (GET "/" [] "Here be Corgis. Try hitting /random")
-  (GET "/random" [] (fetch-corgis))
+  (GET "/random" [] (first (photos-tagged [:corgi])))
   (GET ["/random/:num" :num #"[0-9]"] [num]
-       (clojure.string/join "," (fetch-corgis (Integer/parseInt num))))
+       (clojure.string/join "," (take (Integer/parseInt num) (photos-tagged [:corgi]))))
   (route/not-found "Not Found"))
 
 (def app
